@@ -1,0 +1,55 @@
+#import libraries
+import requests
+import pandas as pd
+
+#keys and channel id
+API_Key = '[Enter API Key]'
+CHANNEL_ID = '[Enter YouTube Channel ID]' 
+
+#make API call
+pageToken = ''
+url = 'https://www.googleapis.com/youtube/v3/search?key='+API_Key+'&channelId='+CHANNEL_ID+'&part=snippet,id&order=date&maxResults=10'+pageToken #max results set to 10
+
+response = requests.get(url).json()
+
+#lists for data
+id_list = []
+title_list = []
+upload_list = []
+views_list = []
+likes_list = []
+comments_list = []
+
+def get_video_details(video_id):
+        #getting data for views, likes, and comments
+        url_video_stats = 'https://www.googleapis.com/youtube/v3/videos?id='+video_id+'&part=statistics&key='+API_Key
+        response_video_stats = requests.get(url_video_stats).json()
+
+        video_views = response_video_stats['items'][0]['statistics']['viewCount']
+        video_likes = response_video_stats['items'][0]['statistics']['likeCount']
+        video_comments = response_video_stats['items'][0]['statistics']['commentCount']
+
+        return video_views, video_likes, video_comments
+
+
+#loop for going through all the id, title, and date categories in the items category
+for video in response['items']:
+    if video['id']['kind'] == 'youtube#video':
+        video_id = video['id']['videoId']
+        video_title = video['snippet']['title'].replace('&amp;', '')
+        upload_date = video['snippet']['publishedAt'].split('T')[0]
+
+        video_views, video_likes, video_comments = get_video_details(video_id)
+
+        #add data to empty lists
+        id_list += [video_id]
+        title_list += [video_title]
+        upload_list += [upload_date]
+        views_list += [video_views]
+        likes_list += [video_likes]
+        comments_list += [video_comments]
+
+#create dataframe with data and columns
+df = pd.DataFrame(list(zip(id_list, title_list, upload_list, views_list, likes_list, comments_list)), columns=['video_id', 'video_title', 'upload_date', 'video_views', 'video_likes', 'video_comments'])
+
+print(df)

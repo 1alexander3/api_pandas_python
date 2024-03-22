@@ -5,5 +5,7 @@ Limiting the pull to 10 videos is to prevent long wait times, and to account for
 Future Improvements:
 
 Customizing the number of videos pulled
+
 Retrieving more information such as Channel Name and Video Length
+
 Selecting the top liked comment
